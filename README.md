@@ -102,6 +102,7 @@ CMD:
 
 ```cmd
 powershell -c "-join (1..14 | % { Get-Random -Max 10 })"
+```
 
 `14` là số chữ số trong dãy output sinh ra sau khi chạy lệnh.
 
