@@ -1,0 +1,133 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./backend/sql:/docker-entrypoint-initdb.d
+    ports:
+      - "3308:3306"
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  user-service:
+    build: ./backend/user-service
+    ports:
+      - "8001:8000"
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: user_db
+      DB_USER: user_admin
+      DB_PASSWORD: ${USER_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_KEY: ${INTERNAL_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  account-service:
+    build: ./backend/account-service
+    restart: on-failure
+    ports:
+      - "8002:8000"
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: account_db
+      DB_USER: account_admin
+      DB_PASSWORD: ${ACCOUNT_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_KEY: ${INTERNAL_KEY}
+      USER_SERVICE_URL: http://user-service:8000
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tuition-service:
+    build: ./backend/tuition-service
+    restart: on-failure
+    ports:
+      - "8003:8000"
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: tuition_db
+      DB_USER: tuition_admin
+      DB_PASSWORD: ${TUITION_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_KEY: ${INTERNAL_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  otp-service:
+    build: ./backend/otp-service
+    restart: on-failure
+    ports:
+      - "8005:8000"
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: otp_db
+      DB_USER: otp_admin
+      DB_PASSWORD: ${OTP_DB_PASSWORD}
+      INTERNAL_KEY: ${INTERNAL_KEY}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      OTP_VALID_SECONDS: ${OTP_VALID_SECONDS}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  payment-service:
+    build: ./backend/payment-service
+    restart: on-failure
+    ports:
+      - "8004:8000"
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: payment_db
+      DB_USER: payment_admin
+      DB_PASSWORD: ${PAYMENT_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_KEY: ${INTERNAL_KEY}
+      USER_SERVICE_URL: http://user-service:8000
+      ACCOUNT_SERVICE_URL: http://account-service:8000
+      TUITION_SERVICE_URL: http://tuition-service:8000
+      OTP_SERVICE_URL: http://otp-service:8000
+      OTP_VALID_SECONDS: ${OTP_VALID_SECONDS}
+    depends_on:
+      db:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      account-service:
+        condition: service_started
+      tuition-service:
+        condition: service_started
+      otp-service:
+        condition: service_started
+
+  frontend:
+    build: ./frontend
+    restart: on-failure
+    ports:
+      - "3000:80"
+    depends_on:
+      - user-service
+      - account-service
+      - tuition-service
+      - payment-service
+
+volumes:
+  dbdata:

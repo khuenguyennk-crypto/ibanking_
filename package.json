@@ -1,0 +1,11 @@
+﻿{
+  "name": "ibanking",
+  "private": true,
+  "scripts": {
+    "db:reset": "node tests/reset-db.mjs",
+    "test:install": "python -m pip install -r tests/requirements.txt",
+    "test:e2e": "cd tests && python -m pytest",
+    "test:concurrency": "cd tests && python -m pytest e2e/test_concurrency.py",
+    "test": "npm run test:e2e"
+  }
+}
