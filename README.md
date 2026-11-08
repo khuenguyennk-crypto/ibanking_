@@ -64,9 +64,21 @@ CMD:
 powershell -NoProfile -Command "function K{$b=New-Object byte[] 32;[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b);-join($b|%{$_.ToString('x2')})}; 'JWT_SECRET='+(K); 'INTERNAL_KEY='+(K)"
 ```
 
-Trong `.env`, SMTP để trống thì email không gửi thật mà in ra log. Muốn gửi bằng Gmail thì điền `smtp.gmail.com`, email và App Password của Gmail. 
+Nếu để trống `SMTP_HOST` thì hệ thống không gửi email thật. Nội dung email (gồm mã OTP) được in ra log của otp-service, xem bằng `docker compose logs -f otp-service`. Cách này đủ để chạy thử và demo.
 
-Email của các tài khoản demo là địa chỉ giả, muốn nhận OTP thật thì đổi email trong `backend/user-service/seeds.py` thành email của mình, rồi `docker compose down -v` và bật lại.
+Muốn gửi email thật qua Gmail thì điền vào `.env`:
+
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=tencuaban@gmail.com
+SMTP_PASSWORD=abcdefghijklmnop
+SMTP_FROM=tencuaban@gmail.com
+```
+
+- `SMTP_USER`: địa chỉ Gmail dùng để gửi.
+- `SMTP_PASSWORD`: không phải mật khẩu đăng nhập Gmail, mà là App Password (mật khẩu ứng dụng) gồm 16 ký tự. Muốn tạo thì tài khoản Google phải bật xác minh 2 bước, sau đó vào https://myaccount.google.com/apppasswords, đặt tên bất kỳ rồi copy mã được cấp. Bỏ các dấu cách giữa các nhóm ký tự khi dán vào.
+- `SMTP_FROM`: địa chỉ hiện ở mục người gửi, thường để giống `SMTP_USER`.
 
 Sau đó chạy:
 
