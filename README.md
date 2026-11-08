@@ -1,4 +1,4 @@
-# iBanking - Đóng học phí
+# iBanking
 
 Bài giữa kỳ môn Kiến trúc hướng dịch vụ (504070).
 
@@ -6,7 +6,7 @@ Người dùng đăng nhập, nhập MSSV để xem học phí, chọn tài kho�
 
 ## Các service
 
-| Service | Làm gì | DB | Port |
+| Service | Thực hiện | DB | Port |
 |---|---|---|---|
 | frontend | Giao diện React, Nginx chuyển `/api` tới các service | | 3000 |
 | user-service | Đăng nhập, thông tin người dùng | user_db | 8001 |
@@ -144,20 +144,36 @@ Khi đang chạy, mỗi service có trang Swagger:
 
 ## Test
 
-Test tự động nằm trong `tests/e2e`, dùng pytest. Phải bật hệ thống trước.
+Test tự động viết bằng pytest, nằm trong thư mục `tests/e2e`. Test gọi API thật qua http://localhost:3000 giống như frontend, đồng thời đọc thẳng MySQL (cổng 3308) để lấy mã OTP và kiểm tra số dư, trạng thái học phí sau mỗi giao dịch.
 
-```
-npm run test:install
-npm test
-```
+Trước khi chạy test:
 
-Lệnh đầu chỉ cần chạy một lần để cài thư viện. Muốn chạy riêng test đồng thời thì dùng `npm run test:concurrency`.
+- Hệ thống phải đang chạy (`docker compose up -d`, các service đều `Up`).
+- File `.env` phải có `MYSQL_ROOT_PASSWORD`, vì test dùng tài khoản root để đọc và reset dữ liệu.
+- Máy có Node.js (để chạy lệnh `npm`) và Python 3. Nếu máy gõ `py` mới chạy được Python thì sửa `python` thành `py` trong `package.json`.
 
-Test sẽ reset dữ liệu trước mỗi lần chạy (xóa giao dịch, trả số dư và học phí về như cũ). Muốn tự reset sau khi test tay thì:
+Các lệnh, chạy ở thư mục gốc:
 
-```
-npm run db:reset
-```
+| Lệnh | Thực hiện |
+|---|---|
+| `npm run test:install` | Cài thư viện cho test (pytest, httpx, pymysql). Chỉ cần chạy lần đầu |
+| `npm test` | Chạy toàn bộ test |
+| `npm run test:concurrency` | Chỉ chạy 2 test đồng thời |
+| `npm run db:reset` | Đưa dữ liệu về như ban đầu |
+
+Các nhóm test:
+
+| File | Kiểm tra |
+|---|---|
+| `test_basic.py` | Đăng nhập đúng và sai, gọi API khi chưa đăng nhập, thông tin cá nhân, danh sách tài khoản, tra cứu MSSV có và không tồn tại |
+| `test_payment_flow.py` | Thanh toán thành công (số dư giảm, học phí thành đã đóng, có trong lịch sử), không trả được học phí đã đóng, không đủ số dư, dùng tài khoản của người khác, OTP sai, OTP hết hạn, gửi lại OTP thì mã cũ mất hiệu lực, xác nhận lại không bị trừ tiền thêm, hủy giao dịch |
+| `test_concurrency.py` | 3 giao dịch cùng lúc trên 1 tài khoản thì chỉ 1 thành công và số dư không âm; 3 tài khoản cùng lúc trả 1 khoản học phí thì chỉ 1 thành công, các tài khoản còn lại không mất tiền |
+
+Chạy đúng thì mỗi test hiện `PASSED`, dòng cuối có dạng `18 passed`. Test nào hỏng sẽ hiện `FAILED` kèm dòng kiểm tra bị sai.
+
+Lưu ý: trước mỗi test, dữ liệu bị đưa về như ban đầu (xóa hết giao dịch, OTP, lịch sử biến động số dư, đặt lại số dư và trạng thái học phí). Vì vậy chạy test xong thì lịch sử giao dịch tạo bằng tay trước đó cũng mất.
+
+`npm run db:reset` làm việc reset tương tự nhưng không chạy test. Dùng sau khi test tay trên giao diện, khi tài khoản đã hết tiền hoặc học phí đã đóng hết mà muốn làm lại từ đầu. Lệnh này không xóa người dùng và không cần tắt hệ thống.
 
 ## Tắt
 
