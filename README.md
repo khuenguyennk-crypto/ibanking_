@@ -28,12 +28,12 @@ Backend viết bằng FastAPI, mỗi service một database riêng. Các service
 Tạo file `.env` ở thư mục gốc, copy từ `.env.example` rồi điền:
 
 ```
-MYSQL_ROOT_PASSWORD=root_pw
-USER_DB_PASSWORD=user_pw
-ACCOUNT_DB_PASSWORD=account_pw
-TUITION_DB_PASSWORD=tuition_pw
-PAYMENT_DB_PASSWORD=payment_pw
-OTP_DB_PASSWORD=otp_pw
+MYSQL_ROOT_PASSWORD=...
+USER_DB_PASSWORD=...
+ACCOUNT_DB_PASSWORD=...
+TUITION_DB_PASSWORD=...
+PAYMENT_DB_PASSWORD=...
+OTP_DB_PASSWORD=...
 
 JWT_SECRET=...
 INTERNAL_KEY=...
@@ -47,9 +47,26 @@ SMTP_PASSWORD=
 SMTP_FROM=
 ```
 
-Mật khẩu các DB phải đúng như trên vì đã tạo sẵn trong `backend/sql/01-db.sql`, còn `MYSQL_ROOT_PASSWORD` thì đặt gì cũng được. `JWT_SECRET` và `INTERNAL_KEY` có thể sinh bằng lệnh ở cuối `.env.example`.
+Mật khẩu DB đặt tùy ý, nên chỉ dùng chữ và số. Lúc khởi tạo, MySQL chạy `backend/sql/01-db.sql` để tạo database, bảng và dữ liệu mẫu, sau đó chạy `backend/sql/02-users.sh` để tạo user cho từng service với mật khẩu lấy từ `.env`.
 
-SMTP để trống thì email không gửi thật mà in ra log. Muốn gửi bằng Gmail thì điền `smtp.gmail.com`, email và App Password của Gmail.
+`JWT_SECRET` và `INTERNAL_KEY` nên là chuỗi dài, ngẫu nhiên. Có thể sinh bằng lệnh dưới đây rồi copy kết quả vào `.env`.
+
+PowerShell:
+
+```powershell
+function New-Key { $b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString("x2") }) }
+"JWT_SECRET=$(New-Key)"; "INTERNAL_KEY=$(New-Key)"
+```
+
+CMD:
+
+```cmd
+powershell -NoProfile -Command "function K{$b=New-Object byte[] 32;[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b);-join($b|%{$_.ToString('x2')})}; 'JWT_SECRET='+(K); 'INTERNAL_KEY='+(K)"
+```
+
+Trong `.env`, SMTP để trống thì email không gửi thật mà in ra log. Muốn gửi bằng Gmail thì điền `smtp.gmail.com`, email và App Password của Gmail. 
+
+Email của các tài khoản demo là địa chỉ giả, muốn nhận OTP thật thì đổi email trong `backend/user-service/seeds.py` thành email của mình, rồi `docker compose down -v` và bật lại.
 
 Sau đó chạy:
 
@@ -74,6 +91,19 @@ Mật khẩu đều là `123456`.
 | cuong | ACB | 15.000.000 |
 
 MSSV để tra: `520H0001` đến `520H0004`.
+
+Ghi chú: Số tài khoản trong dữ liệu mẫu (`backend/sql/01-db.sql`) là số được sinh ngẫu nhiên bằng:
+
+```powershell
+-join (1..14 | % { Get-Random -Max 10 })
+```
+
+CMD:
+
+```cmd
+powershell -c "-join (1..14 | % { Get-Random -Max 10 })"
+
+`14` là số chữ số trong dãy output sinh ra sau khi chạy lệnh.
 
 ## Cách dùng
 
@@ -122,5 +152,4 @@ npm run db:reset
 docker compose down
 ```
 
-Thêm `-v` nếu muốn xóa luôn database. Sửa `01-db.sql` thì phải chạy `docker compose down -v` rồi bật lại mới nhận database đã sửa.
-
+Thêm `-v` nếu muốn xóa luôn database. Database và user chỉ được tạo một lần lúc khởi tạo, nên nếu sửa file trong `backend/sql` hoặc đổi mật khẩu DB trong `.env` thì phải chạy `docker compose down -v` rồi bật lại.

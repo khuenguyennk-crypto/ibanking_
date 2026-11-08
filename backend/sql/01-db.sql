@@ -6,19 +6,6 @@ CREATE DATABASE IF NOT EXISTS tuition_db;
 CREATE DATABASE IF NOT EXISTS payment_db;
 CREATE DATABASE IF NOT EXISTS otp_db;
 
-CREATE USER IF NOT EXISTS 'user_admin'@'%' IDENTIFIED BY 'user_pw';
-CREATE USER IF NOT EXISTS 'account_admin'@'%' IDENTIFIED BY 'account_pw';
-CREATE USER IF NOT EXISTS 'tuition_admin'@'%' IDENTIFIED BY 'tuition_pw';
-CREATE USER IF NOT EXISTS 'payment_admin'@'%' IDENTIFIED BY 'payment_pw';
-CREATE USER IF NOT EXISTS 'otp_admin'@'%' IDENTIFIED BY 'otp_pw';
-
-GRANT ALL PRIVILEGES ON user_db.* TO 'user_admin'@'%';
-GRANT ALL PRIVILEGES ON account_db.* TO 'account_admin'@'%';
-GRANT ALL PRIVILEGES ON tuition_db.* TO 'tuition_admin'@'%';
-GRANT ALL PRIVILEGES ON payment_db.* TO 'payment_admin'@'%';
-GRANT ALL PRIVILEGES ON otp_db.* TO 'otp_admin'@'%';
-FLUSH PRIVILEGES;
-
 USE user_db;
 CREATE TABLE users (
     user_id BIGINT  NOT NULL AUTO_INCREMENT,
