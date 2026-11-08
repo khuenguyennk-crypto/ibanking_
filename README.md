@@ -104,7 +104,7 @@ Mật khẩu đều là `123456`.
 
 MSSV để tra: `520H0001` đến `520H0004`.
 
-Ghi chú: Số tài khoản trong dữ liệu mẫu (`backend/sql/01-db.sql`) là số được sinh ngẫu nhiên bằng:
+Ghi chú: Số tài khoản trong dữ liệu mẫu (`backend/sql/01-db.sql`) là số được sinh ngẫu nhiên sau khi chạy lệnh:
 
 Powershell:
 
@@ -118,7 +118,7 @@ CMD:
 powershell -c "-join (1..14 | % { Get-Random -Max 10 })"
 ```
 
-`14` là số chữ số trong dãy output sinh ra sau khi chạy lệnh.
+`14` là số lượng chữ số dãy output sinh ra sau khi chạy lệnh.
 
 ## Cách dùng
 
