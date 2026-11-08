@@ -106,6 +106,8 @@ MSSV để tra: `520H0001` đến `520H0004`.
 
 Ghi chú: Số tài khoản trong dữ liệu mẫu (`backend/sql/01-db.sql`) là số được sinh ngẫu nhiên bằng:
 
+Powershell:
+
 ```powershell
 -join (1..14 | % { Get-Random -Max 10 })
 ```
