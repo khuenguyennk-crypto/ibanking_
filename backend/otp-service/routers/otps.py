@@ -14,7 +14,7 @@ from security import verify_internal_key
 
 router = APIRouter(tags=["OTP"], dependencies=[Depends(verify_internal_key)])
 
-OTP_VALID_SECONDS = int(os.environ["OTP_VALID_SECONDS"])
+OTP_VALID_SECONDS = int(os.environ["OTP_VALID_SECONDS"] or 300)
 
 
 def _now() -> datetime:

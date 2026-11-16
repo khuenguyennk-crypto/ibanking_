@@ -11,7 +11,7 @@ from models import Transaction
 
 logger = logging.getLogger("saga")
 
-OTP_VALID_SECONDS = int(os.environ["OTP_VALID_SECONDS"])
+OTP_VALID_SECONDS = int(os.environ["OTP_VALID_SECONDS"] or 300)
 STUCK_AFTER_SECONDS = int(os.getenv("STUCK_AFTER_SECONDS") or 60)
 
 

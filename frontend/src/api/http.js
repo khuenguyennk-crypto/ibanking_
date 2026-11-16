@@ -62,7 +62,9 @@ export async function request(path, options = {}) {
         let message = `Yêu cầu thất bại (HTTP ${response.status}).`;
         if (errorData && errorData.message) {
             message = errorData.message;
-        } else if (typeof errorData === 'string') {
+        } else if (response.status >= 502 && response.status <= 504) {
+            message = 'Dịch vụ đang tạm thời không khả dụng. Vui lòng thử lại sau.';
+        } else if (typeof errorData === 'string' && !errorData.trimStart().startsWith('<')) {
             message = errorData;
         }
 
