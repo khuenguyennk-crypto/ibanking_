@@ -4,6 +4,11 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      USER_DB_PASSWORD: ${USER_DB_PASSWORD}
+      ACCOUNT_DB_PASSWORD: ${ACCOUNT_DB_PASSWORD}
+      TUITION_DB_PASSWORD: ${TUITION_DB_PASSWORD}
+      PAYMENT_DB_PASSWORD: ${PAYMENT_DB_PASSWORD}
+      OTP_DB_PASSWORD: ${OTP_DB_PASSWORD}
     volumes:
       - dbdata:/var/lib/mysql
       - ./backend/sql:/docker-entrypoint-initdb.d
